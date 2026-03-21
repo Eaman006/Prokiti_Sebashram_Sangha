@@ -8,11 +8,13 @@ const Navbar = () => {
           Prokriti Sebashram Sangha
         </div>
         <div>
-          <ul className='flex gap-5'>
-            <li>Home</li>
-            <li>About us</li>
-            <li>Contact us</li>
+          <ul className='flex gap-5 m-2'>
+            <li className='cursor-pointer'>Home</li>
+            <li className='cursor-pointer'>About us</li>
+            <li className='cursor-pointer'>Contact us</li>
+            <div className='bg-purple-600'>Store</div>
           </ul>
+
         </div>
       </div>
     </div>
