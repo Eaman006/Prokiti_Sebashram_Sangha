@@ -1,6 +1,7 @@
 "use client"
-import { usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -15,6 +16,7 @@ const Navbar = () => {
           Prokriti Sebashram Sangha
         </div>
         <div>
+          
           <ul className='flex gap-10 m-2 justify-center items-center'>
             <li className={`cursor-pointer ${getActiveClass("/")}`}><Link href={"/"}>Home</Link></li>
             <li className={`cursor-pointer ${getActiveClass("/about")}`}><Link href={"/about"}>About us</Link></li>
