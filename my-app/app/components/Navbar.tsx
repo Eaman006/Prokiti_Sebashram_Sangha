@@ -1,22 +1,30 @@
-import React from 'react'
+"use client"
+import { usePathname } from 'next/navigation'
+import Link from 'next/link';
 
 const Navbar = () => {
+  const pathname = usePathname();
+  const getActiveClass=(path: string) =>{
+    return pathname === path ? 'text-purple-600':'hover:text-purple-600'
+  }
   return (
     
     <div className='bg-white text-black'>
       <div className='flex justify-between items-center'>
-        <div className='text-3xl font-bold p-4'>
+        <div className='text-3xl font-bold p-4 text-purple-600'>
           Prokriti Sebashram Sangha
         </div>
         <div>
-          <ul className='flex gap-5 m-2 justify-center items-center'>
-            <li className='cursor-pointer'>Home</li>
-            <li className='cursor-pointer'>About us</li>
-            <li className='cursor-pointer'>Contact us</li>
-            <div className='bg-purple-600 p-2 rounded-xl cursor-pointer text-lg font-bold text-white hover:bg-purple-700 hover:active:bg-purple-500 transition duration-300 ease-in-out shadow-2xl'>Store</div>
+          <ul className='flex gap-10 m-2 justify-center items-center'>
+            <li className={`cursor-pointer ${getActiveClass("/")}`}><Link href={"/"}>Home</Link></li>
+            <li className={`cursor-pointer ${getActiveClass("/about")}`}><Link href={"/about"}>About us</Link></li>
+            <li className={`cursor-pointer ${getActiveClass("/contact")}`}><Link href={"/contact"}>Contact us</Link></li>
+            
           </ul>
+          
 
         </div>
+        <div className='bg-purple-600 m-2 px-4 py-2 rounded-xl cursor-pointer text-lg font-bold text-white hover:bg-purple-800 hover:active:bg-purple-500 transition duration-300 ease-in-out shadow-2xl'>Store</div>
       </div>
     </div>
   )
