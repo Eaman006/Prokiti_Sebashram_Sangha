@@ -9,8 +9,8 @@ const Navbar = () => {
   }
   return (
     
-    <div className='bg-white text-black'>
-      <div className='flex justify-between items-center'>
+    <div className='bg-white text-black shadow-lg shadow-black/20 relative z-50'>
+      <div className='flex justify-between items-center '>
         <div className='text-3xl font-bold p-4 text-purple-600'>
           Prokriti Sebashram Sangha
         </div>
@@ -24,7 +24,7 @@ const Navbar = () => {
           
 
         </div>
-        <div className='bg-purple-600 m-2 px-4 py-2 rounded-xl cursor-pointer text-lg font-bold text-white hover:bg-purple-800 hover:active:bg-purple-500 transition duration-300 ease-in-out shadow-2xl'>Store</div>
+        <div className='bg-purple-600 m-2 px-4 py-2 rounded-xl cursor-pointer text-lg font-bold text-white hover:bg-purple-800 hover:active:bg-purple-500 transition duration-300 ease-in-out shadow-purple-600/20 shadow-md'>Store</div>
       </div>
     </div>
   )
