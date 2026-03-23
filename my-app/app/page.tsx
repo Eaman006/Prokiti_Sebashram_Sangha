@@ -1,8 +1,9 @@
-
+import Slideshow from "./components/Slideshow";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
+  const teamPhotos = ["/banner.jpeg","/brand.png"]
   return (
     <div className="bg-white">
       <div className="md:flex mx-4 p-2 mt-10 justify-between">
@@ -16,7 +17,11 @@ export default function Home() {
         </div>        
           
         </div>
-        <Image className="m-2 p-2" src={"/banner.jpeg"} height={600} width={600} alt=""></Image>
+        <div className="w-1/2">
+          <Slideshow images={teamPhotos} height="h-[50vh]"/>
+        </div>
+        
+
 
       </div>
     </div>
