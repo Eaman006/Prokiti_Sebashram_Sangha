@@ -1,6 +1,7 @@
 import Slideshow from "./components/Slideshow";
 import Image from "next/image";
 import Link from "next/link";
+import TypingEffect from "./components/TypingEffect";
 
 export default function Home() {
   const teamPhotos = ["/banner.jpeg", "/brand.png", "/book.jpeg"]
@@ -9,7 +10,11 @@ export default function Home() {
       <div className="md:flex mx-2 p-2 mt-10 justify-between">
         <div className="md:w-full rounded-2xl shadow-purple-300 shadow-lg p-2 m-4 w-full"><div className="text-black m-2 p-2 md:text-5xl font-bold text-xl">Empowering Tribal Communities for a Better Future</div>
           <div className="text-gray-500 font-bold m-2 p-2">
-            Prokriti Sebashram Sangha is dedicated to restoring rights, education, and social equity for the tribal and minority section of our society through sustainable grassroots
+            <TypingEffect 
+          text="Prokriti Sebashram Sangha is dedicated to restoring rights, education, and social equity for the tribal and minority section of our society through sustainable grassroots." 
+          speed={0.02} 
+          once={false} 
+        />
           </div>
           <div className="flex gap-5 justify-center items-center m-2 p-4">
             <div className="bg-purple-600 py-2 px-4 font-bold rounded-2xl cursor-pointer text-white md:text-xl hover:bg-purple-800 hover:active:bg-purple-300 shadow-purple-400 shadow-lg">Join our Mission</div>
