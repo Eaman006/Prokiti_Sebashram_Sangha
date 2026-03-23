@@ -3,30 +3,31 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
-// Define what the component expects to receive
 interface SlideshowProps {
   images: string[];
-  height?: string; // Optional: allow different pages to have different heights
+  // Change 'height' to 'className' for better flexibility
+  className?: string; 
 }
 
-export default function Slideshow({ images, height = "h-[500px]" }: SlideshowProps) {
+export default function Slideshow({ 
+  images, 
+  // Default to responsive heights if no class is provided
+  className = "h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px]" 
+}: SlideshowProps) {
   const [index, setIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
 
   const nextSlide = useCallback(() => {
     setIndex((prev) => (prev + 1) % images.length);
   }, [images.length]);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isPlaying) {
-      timer = setInterval(nextSlide, 5000);
-    }
+    const timer = setInterval(nextSlide, 5000);
     return () => clearInterval(timer);
-  }, [isPlaying, nextSlide]);
+  }, [nextSlide]);
 
   return (
-    <div className={`relative w-full ${height} overflow-hidden rounded-xl bg-gray-900`}>
+    // Apply the className here
+    <div className={`relative w-full overflow-hidden rounded-xl bg-gray-900 ${className}`}>
       <AnimatePresence mode="wait">
         <motion.div
           key={index}
@@ -37,21 +38,13 @@ export default function Slideshow({ images, height = "h-[500px]" }: SlideshowPro
           className="absolute inset-0"
         >
           <Image
-            src={images[index]}
-            alt="Slideshow"
-            fill
-            className="object-cover"
-          />
+  src={images[index]}
+  alt="Slideshow"
+  fill
+  className="object-contain" // Changed from object-cover
+/>
         </motion.div>
       </AnimatePresence>
-
-      {/* Play/Pause Button */}
-      <button
-        onClick={() => setIsPlaying(!isPlaying)}
-        className="absolute bottom-4 right-4 z-20 p-2 bg-white/20 backdrop-blur-md rounded-full text-white"
-      >
-        {isPlaying ? "Pause" : "Play"}
-      </button>
     </div>
   );
 }
