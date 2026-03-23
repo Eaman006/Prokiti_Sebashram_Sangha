@@ -23,7 +23,7 @@ const Navbar = () => {
 
   return (
     <>
-      <div className='bg-white shadow-lg shadow-black/20 relative z-50'>
+      <div className='bg-white shadow-lg shadow-black/20 z-50 fixed w-full'>
         <div className='flex justify-between items-center px-2 py-2'>
           <div className='md:text-3xl font-bold p-2 text-purple-600'>
             Prokriti Sebashram Sangha
