@@ -21,13 +21,13 @@ export default function Slideshow({
   }, [images.length]);
 
   useEffect(() => {
-    const timer = setInterval(nextSlide, 5000);
+    const timer = setInterval(nextSlide, 10000);
     return () => clearInterval(timer);
   }, [nextSlide]);
 
   return (
     // Apply the className here
-    <div className={`relative w-full overflow-hidden rounded-xl bg-gray-900 ${className}`}>
+    <div className={`relative w-full overflow-hidden rounded-xl bg-white ${className}`}>
       <AnimatePresence mode="wait">
         <motion.div
           key={index}
