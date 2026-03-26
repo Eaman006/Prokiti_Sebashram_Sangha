@@ -72,9 +72,9 @@ export default function Home() {
       </div>
       <div className="m-4 p-2">
         <FadeIn direction="right" delay={0.2}>
-        <div className="text-5xl text-amber-700 font-bold">Our Vision</div>
+        <div className="text-5xl text-amber-700 font-extrabold">Our Vision</div>
         </FadeIn>
-        <div className="m-2 p-2 text-black text-lg">
+        <div className="m-2 p-2 text-black text-lg h-10">
           <TypingEffect
               text="Our vision is to function as a secular, irrevocable public trust dedicated to the socio-economic upliftment of the people of India. We strive to blend traditional cultural preservation with modern scientific advancement—ranging from organic agriculture to higher technical education—to ensure a future defined by equity, knowledge, and universal brotherhood."
               speed={0.01}
