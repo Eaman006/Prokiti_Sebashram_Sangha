@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import TypingEffect from "./components/TypingEffect";
 import FadeIn from "./components/FadeIn";
+import AnimatedCounter from "./components/AnimatedCounter";
 
 export default function Home() {
   const teamPhotos = ["/banner.jpeg", "/brand.png", "/book.jpeg"]
@@ -44,6 +45,8 @@ export default function Home() {
             <Image src={"/edu.png"} height={50} width={50} alt="bg"></Image>
             <div className="text-black font-bold text-xl">Education</div>
             <div className="text-black">Establishing and granting aid to schools, ITI colleges, and engineering institutions.</div>
+            <div className="text-center font-bold text-4xl text-blue-700 mt-5"><AnimatedCounter target={50} /></div>
+            <div className="text-blue-700 text-center text-sm">Educational Institute impacted</div>
           </div>
           </FadeIn>
           <FadeIn direction="up" delay={0.4}>
@@ -51,6 +54,10 @@ export default function Home() {
             <Image src={"/med.png"} height={50} width={50} alt="bg"></Image>
             <div className="text-black font-bold text-xl">Healthcare</div>
             <div className="text-black">Running charitable hospitals, maternity homes, and health check-up centers.</div>
+            <div className="text-center font-bold text-4xl text-blue-700 mt-5">
+              <AnimatedCounter target={70} />
+            </div>
+            <div className="text-blue-700 text-center text-sm">Healthcare Projects</div>
           </div>
           </FadeIn>
           <FadeIn direction="up" delay={0.6}>
@@ -58,6 +65,10 @@ export default function Home() {
             <Image src={"/ag.png"} height={50} width={50} alt="bg"></Image>
             <div className="text-black font-bold text-xl">Agriculture and Environment</div>
             <div className="text-black">Promoting organic farming, rainwater harvesting, and solar energy.</div>
+            <div className="text-center font-bold text-4xl text-blue-700 mt-5">
+              <AnimatedCounter target={40} />
+            </div>
+            <div className="text-blue-700 text-center text-sm">Agricultural Products</div>
           </div>
           </FadeIn>
           <FadeIn direction="up" delay={0.8}>
@@ -65,6 +76,10 @@ export default function Home() {
             <Image src={"/sc.png"} height={50} width={50} alt="bg"></Image>
             <div className="text-black font-bold text-xl">Social Empowerment</div>
             <div className="text-black">Supporting orphans, widows, the elderly, and those with disabilities.</div>
+            <div className="text-center font-bold text-4xl text-blue-700 mt-5">
+              <AnimatedCounter target={30} />
+            </div>
+            <div className="text-blue-700 text-center text-sm">Orphan Homes Supported</div>
           </div>
           </FadeIn>
         </div>
