@@ -4,6 +4,7 @@ import Link from "next/link";
 import TypingEffect from "./components/TypingEffect";
 import FadeIn from "./components/FadeIn";
 import AnimatedCounter from "./components/AnimatedCounter";
+import VisionMap from "./components/VisionMap";
 
 export default function Home() {
   const teamPhotos = ["/banner.jpeg", "/brand.png", "/book.jpeg"]
@@ -96,7 +97,11 @@ export default function Home() {
               once={false}
             />
         </div>
-        <div></div>
+        <div>
+          <FadeIn direction="right" delay={0.2}>
+        <VisionMap></VisionMap>
+        </FadeIn>
+        </div>
 
       </div>
     </div>
