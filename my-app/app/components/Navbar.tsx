@@ -11,6 +11,10 @@ const Navbar = () => {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   const getActiveClass = (path: string) => {
     return pathname === path ? 'text-purple-600' : 'text-black hover:text-purple-600';
   }
