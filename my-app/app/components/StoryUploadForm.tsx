@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { MdCloudUpload } from "react-icons/md";
 import type { Story } from "@/lib/seedStories";
+import { compressAndConvertToDataUrl } from "@/lib/imageUtils";
 
 const StoryUploadForm = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,16 +57,23 @@ const StoryUploadForm = () => {
     setIsSubmitting(true);
 
     try {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("caption", caption);
-      formData.append("location", location);
-      if (date) formData.append("date", date);
-      files.forEach((file) => formData.append("images", file));
+      // Compress and convert files to Data URLs client-side (prevents Vercel 4.5MB limit & read-only fs error)
+      const dataUrls = await Promise.all(
+        files.map((file) => compressAndConvertToDataUrl(file))
+      );
 
       const response = await fetch("/api/stories", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          caption,
+          location,
+          date,
+          images: dataUrls,
+        }),
       });
 
       const data = (await response.json()) as Story | { error: string };

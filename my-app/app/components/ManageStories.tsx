@@ -14,6 +14,7 @@ import {
   Plus,
 } from "lucide-react";
 import type { Story } from "@/lib/seedStories";
+import { compressAndConvertToDataUrl } from "@/lib/imageUtils";
 
 export default function ManageStories() {
   const [stories, setStories] = useState<Story[]>([]);
@@ -114,21 +115,24 @@ export default function ManageStories() {
     setMessage(null);
 
     try {
-      const formData = new FormData();
-      formData.append("id", editingStory.id);
-      formData.append("title", editTitle);
-      formData.append("caption", editCaption);
-      formData.append("location", editLocation);
-      if (editDate) formData.append("date", editDate);
-      formData.append("existingGallery", JSON.stringify(existingGallery));
-
-      newImageFiles.forEach((file) => {
-        formData.append("newImages", file);
-      });
+      const newImagesDataUrls = await Promise.all(
+        newImageFiles.map((file) => compressAndConvertToDataUrl(file))
+      );
 
       const res = await fetch("/api/stories", {
         method: "PUT",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: editingStory.id,
+          title: editTitle,
+          caption: editCaption,
+          location: editLocation,
+          date: editDate,
+          existingGallery,
+          newImages: newImagesDataUrls,
+        }),
       });
 
       if (!res.ok) {

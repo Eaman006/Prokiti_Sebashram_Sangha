@@ -1,40 +1,104 @@
 import { promises as fs } from "fs";
 import path from "path";
+import os from "os";
 import { SEED_STORIES, type Story } from "./seedStories";
 
-const STORIES_FILE = path.join(process.cwd(), "data", "stories.json");
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "stories");
+const LOCAL_STORIES_FILE = path.join(process.cwd(), "data", "stories.json");
+const TMP_STORIES_FILE = path.join(os.tmpdir(), "pss_stories.json");
 
-const DELETED_STORIES_FILE = path.join(process.cwd(), "data", "deleted_stories.json");
+const LOCAL_DELETED_FILE = path.join(process.cwd(), "data", "deleted_stories.json");
+const TMP_DELETED_FILE = path.join(os.tmpdir(), "pss_deleted_stories.json");
+
+// In-memory cache for Vercel serverless environments
+declare global {
+  // eslint-disable-next-line no-var
+  var _uploadedStoriesCache: Story[] | undefined;
+  // eslint-disable-next-line no-var
+  var _deletedStoryIdsCache: string[] | undefined;
+}
 
 export async function readUploadedStories(): Promise<Story[]> {
-  try {
-    const raw = await fs.readFile(STORIES_FILE, "utf-8");
-    const parsed = JSON.parse(raw) as Story[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
+  if (globalThis._uploadedStoriesCache) {
+    return globalThis._uploadedStoriesCache;
   }
+
+  // 1. Try local project file (local development)
+  try {
+    const raw = await fs.readFile(LOCAL_STORIES_FILE, "utf-8");
+    const parsed = JSON.parse(raw) as Story[];
+    if (Array.isArray(parsed)) {
+      globalThis._uploadedStoriesCache = parsed;
+      return parsed;
+    }
+  } catch {}
+
+  // 2. Try /tmp file (Vercel serverless)
+  try {
+    const raw = await fs.readFile(TMP_STORIES_FILE, "utf-8");
+    const parsed = JSON.parse(raw) as Story[];
+    if (Array.isArray(parsed)) {
+      globalThis._uploadedStoriesCache = parsed;
+      return parsed;
+    }
+  } catch {}
+
+  globalThis._uploadedStoriesCache = [];
+  return [];
 }
 
 export async function writeUploadedStories(stories: Story[]): Promise<void> {
-  await fs.mkdir(path.dirname(STORIES_FILE), { recursive: true });
-  await fs.writeFile(STORIES_FILE, JSON.stringify(stories, null, 2), "utf-8");
-}
+  globalThis._uploadedStoriesCache = stories;
 
-export async function readDeletedStoryIds(): Promise<string[]> {
+  // Try writing to local project dir first
   try {
-    const raw = await fs.readFile(DELETED_STORIES_FILE, "utf-8");
-    const parsed = JSON.parse(raw) as string[];
-    return Array.isArray(parsed) ? parsed : [];
+    await fs.mkdir(path.dirname(LOCAL_STORIES_FILE), { recursive: true });
+    await fs.writeFile(LOCAL_STORIES_FILE, JSON.stringify(stories, null, 2), "utf-8");
   } catch {
-    return [];
+    // Fallback to /tmp directory on Vercel
+    try {
+      await fs.writeFile(TMP_STORIES_FILE, JSON.stringify(stories, null, 2), "utf-8");
+    } catch {}
   }
 }
 
+export async function readDeletedStoryIds(): Promise<string[]> {
+  if (globalThis._deletedStoryIdsCache) {
+    return globalThis._deletedStoryIdsCache;
+  }
+
+  try {
+    const raw = await fs.readFile(LOCAL_DELETED_FILE, "utf-8");
+    const parsed = JSON.parse(raw) as string[];
+    if (Array.isArray(parsed)) {
+      globalThis._deletedStoryIdsCache = parsed;
+      return parsed;
+    }
+  } catch {}
+
+  try {
+    const raw = await fs.readFile(TMP_DELETED_FILE, "utf-8");
+    const parsed = JSON.parse(raw) as string[];
+    if (Array.isArray(parsed)) {
+      globalThis._deletedStoryIdsCache = parsed;
+      return parsed;
+    }
+  } catch {}
+
+  globalThis._deletedStoryIdsCache = [];
+  return [];
+}
+
 export async function writeDeletedStoryIds(ids: string[]): Promise<void> {
-  await fs.mkdir(path.dirname(DELETED_STORIES_FILE), { recursive: true });
-  await fs.writeFile(DELETED_STORIES_FILE, JSON.stringify(ids, null, 2), "utf-8");
+  globalThis._deletedStoryIdsCache = ids;
+
+  try {
+    await fs.mkdir(path.dirname(LOCAL_DELETED_FILE), { recursive: true });
+    await fs.writeFile(LOCAL_DELETED_FILE, JSON.stringify(ids, null, 2), "utf-8");
+  } catch {
+    try {
+      await fs.writeFile(TMP_DELETED_FILE, JSON.stringify(ids, null, 2), "utf-8");
+    } catch {}
+  }
 }
 
 export async function getAllStories(): Promise<Story[]> {
@@ -121,22 +185,17 @@ export async function updateStory(
 }
 
 export async function saveStoryImages(
-  storyId: string,
+  _storyId: string,
   files: File[]
 ): Promise<string[]> {
-  const storyDir = path.join(UPLOAD_DIR, storyId);
-  await fs.mkdir(storyDir, { recursive: true });
-
   const imagePaths: string[] = [];
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    const ext = path.extname(file.name).toLowerCase() || ".jpg";
-    const filename = `${Date.now()}-${i}${ext}`;
-    const filePath = path.join(storyDir, filename);
     const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(filePath, buffer);
-    imagePaths.push(`/uploads/stories/${storyId}/${filename}`);
+    const mimeType = file.type || "image/jpeg";
+    const dataUrl = `data:${mimeType};base64,${buffer.toString("base64")}`;
+    imagePaths.push(dataUrl);
   }
 
   return imagePaths;

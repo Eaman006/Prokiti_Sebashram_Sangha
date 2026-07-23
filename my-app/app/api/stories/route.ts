@@ -19,12 +19,40 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const title = String(formData.get("title") ?? "").trim();
-    const caption = String(formData.get("caption") ?? "").trim();
-    const location = String(formData.get("location") ?? "").trim();
-    const dateInput = String(formData.get("date") ?? "").trim();
-    const images = formData.getAll("images").filter((item): item is File => item instanceof File);
+    let title = "";
+    let caption = "";
+    let location = "";
+    let dateInput = "";
+    let gallery: string[] = [];
+
+    const contentType = request.headers.get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+      const body = (await request.json()) as {
+        title?: string;
+        caption?: string;
+        location?: string;
+        date?: string;
+        images?: string[];
+      };
+      title = String(body.title ?? "").trim();
+      caption = String(body.caption ?? "").trim();
+      location = String(body.location ?? "").trim();
+      dateInput = String(body.date ?? "").trim();
+      gallery = Array.isArray(body.images) ? body.images : [];
+    } else {
+      const formData = await request.formData();
+      title = String(formData.get("title") ?? "").trim();
+      caption = String(formData.get("caption") ?? "").trim();
+      location = String(formData.get("location") ?? "").trim();
+      dateInput = String(formData.get("date") ?? "").trim();
+      const images = formData
+        .getAll("images")
+        .filter((item): item is File => item instanceof File);
+
+      const storyId = `story-${Date.now()}`;
+      gallery = await saveStoryImages(storyId, images);
+    }
 
     if (!title) {
       return NextResponse.json({ error: "Title is required." }, { status: 400 });
@@ -38,12 +66,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Location is required." }, { status: 400 });
     }
 
-    if (images.length === 0) {
-      return NextResponse.json({ error: "At least one image is required." }, { status: 400 });
+    if (gallery.length === 0) {
+      return NextResponse.json(
+        { error: "At least one image is required." },
+        { status: 400 }
+      );
     }
 
     const storyId = `story-${Date.now()}`;
-    const gallery = await saveStoryImages(storyId, images);
     const createdAt = dateInput
       ? new Date(dateInput).toISOString()
       : new Date().toISOString();
@@ -67,7 +97,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Failed to create story:", error);
     return NextResponse.json(
-      { error: "Failed to upload story. Please try again." },
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to upload story. Please try again.",
+      },
       { status: 500 }
     );
   }
@@ -75,16 +108,56 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const formData = await request.formData();
-    const id = String(formData.get("id") ?? "").trim();
-    const title = String(formData.get("title") ?? "").trim();
-    const caption = String(formData.get("caption") ?? "").trim();
-    const location = String(formData.get("location") ?? "").trim();
-    const dateInput = String(formData.get("date") ?? "").trim();
-    const existingGalleryRaw = formData.get("existingGallery");
-    const newImages = formData.getAll("newImages").filter(
-      (item): item is File => item instanceof File
-    );
+    const contentType = request.headers.get("content-type") || "";
+
+    let id = "";
+    let title = "";
+    let caption = "";
+    let location = "";
+    let dateInput = "";
+    let existingGallery: string[] | undefined;
+    let newImages: File[] = [];
+
+    if (contentType.includes("application/json")) {
+      const body = (await request.json()) as {
+        id?: string;
+        title?: string;
+        caption?: string;
+        location?: string;
+        date?: string;
+        existingGallery?: string[];
+        newImages?: string[];
+      };
+      id = String(body.id ?? "").trim();
+      title = String(body.title ?? "").trim();
+      caption = String(body.caption ?? "").trim();
+      location = String(body.location ?? "").trim();
+      dateInput = String(body.date ?? "").trim();
+      existingGallery = Array.isArray(body.existingGallery) ? body.existingGallery : undefined;
+      const extraImages = Array.isArray(body.newImages) ? body.newImages : [];
+      if (existingGallery && extraImages.length > 0) {
+        existingGallery = [...existingGallery, ...extraImages];
+      }
+    } else {
+      const formData = await request.formData();
+      id = String(formData.get("id") ?? "").trim();
+      title = String(formData.get("title") ?? "").trim();
+      caption = String(formData.get("caption") ?? "").trim();
+      location = String(formData.get("location") ?? "").trim();
+      dateInput = String(formData.get("date") ?? "").trim();
+      const existingGalleryRaw = formData.get("existingGallery");
+      newImages = formData
+        .getAll("newImages")
+        .filter((item): item is File => item instanceof File);
+
+      if (existingGalleryRaw) {
+        try {
+          existingGallery = JSON.parse(String(existingGalleryRaw));
+        } catch {
+          existingGallery = undefined;
+        }
+      }
+    }
 
     if (!id) {
       return NextResponse.json({ error: "Story ID is required." }, { status: 400 });
@@ -95,15 +168,6 @@ export async function PUT(request: Request) {
         { error: "Title, caption, and location are required." },
         { status: 400 }
       );
-    }
-
-    let existingGallery: string[] | undefined;
-    if (existingGalleryRaw) {
-      try {
-        existingGallery = JSON.parse(String(existingGalleryRaw));
-      } catch {
-        existingGallery = undefined;
-      }
     }
 
     const updatedStory = await updateStory(id, {
